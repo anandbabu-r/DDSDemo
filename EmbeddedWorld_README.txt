@@ -10,7 +10,7 @@
 Description
 -----------
 HelloWorld example demonstrates a simple usage of DDS.
-The HelloWorldPublisher class publishes a "HelloWorld" message on a "HelloWorldData_Msg" Topic.
+The HelloWorldPublisher class publishes a "SensorData" message on a "SensorData_Msg" Topic.
 The HelloWorldSubscriber class subscribes to this Topic and display the received messages.
 
 Building the demo
