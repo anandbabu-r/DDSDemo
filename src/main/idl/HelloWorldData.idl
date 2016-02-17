@@ -14,6 +14,7 @@ module HelloWorldData
    {
       long userID;    // User ID
       string message; // message
+      string timerID;    // timerID
    };
    #pragma keylist Msg userID
 };

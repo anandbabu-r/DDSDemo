@@ -1,0 +1,38 @@
+JAMAICA=/local/babu/branch-8/petalinux_ful
+VORTEX_HOME=/local/babu/customers/Embeddedworld/vortext_tryagain/Vortex_v2/Device/VortexCafe/2.2.0/
+VORTEXCAFE_CORE=$(VORTEX_HOME)/lib/cafe.jar
+SLF4J_LOGGING=/local/babu/customers/Embeddedworld/vortext_tryagain/slf4j/slf4j-1.7.14/slf4j-simple-1.7.14.jar
+
+CLASSPATH=target/classes:$(VORTEXCAFE_CORE):$(SLF4J_LOGGING)
+SENSOR_PUBLISHER_MAIN=HelloWorldPublisher
+TARGET=linux-x86_64
+SENSOR_PUBLISHER_FULL=helloworld.$(SENSOR_PUBLISHER_MAIN)
+SENSOR_PUBLISHER_PARS=-cp $(CLASSPATH) $(SENSOR_PUBLISHER_MAIN)
+LOCAL_ENVIRON_PARS=Karlsruhe
+PRISMTECH_LICENSE_LOCATION=/local/babu/customers/Embeddedworld/vortext_tryagain/LK04713.lic
+PORT=7500
+
+
+all: run
+
+run: $(SENSOR_PUBLISHER_MAIN)
+	-timeout -s SIGINT 20 ./ddspublisher-demo_$(TARGET) $(LOCAL_ENVIRON_PARS)
+
+$(SENSOR_PUBLISHER_MAIN): $(SENSOR_PUBLISHER_MAIN).prof
+	$(JAMAICA)/bin/jamaicabuilder -includeJAR=$(CLASSPATH) -percentageCompiled=0 -cp=$(CLASSPATH) -XdefineProperty="ddsi.discovery.tcp.port=$(PORT)"  -XdefineProperty="ddsi.network.transport=tcp" -XdefineProperty="ddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400" -XdefineProperty="ddsi.discovery.externalNetworkAddresses=none" -target=$(TARGET) -destination=ddspublisher-demo_$(TARGET) -useProfile=$(SENSOR_PUBLISHER_MAIN).prof $(SENSOR_PUBLISHER_FULL)
+
+sensor_vm: package
+	$(JAMAICA)/bin/jamaicavm -Dddsi.network.transport=tcp -Dddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400 -Dddsi.discovery.externalNetworkAddresses=none $(SENSOR_PUBLISHER_PARS) $(SENSOR_PUBLISHER_FULL)
+
+ant: 
+	ant
+#if ant fails, please do export prismtech_LICENSE=$(PRISMTECH_LICENSE_LOCATION)
+
+$(SENSOR_PUBLISHER_MAIN).prof: ant
+	-timeout -s SIGINT 20 $(JAMAICA)/bin/jamaicavmp -cp=$(CLASSPATH) -Dddsi.network.transport=tcp -Dddsi.discovery.tcp.port=7500 -Dddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400 -Dddsi.discovery.externalNetworkAddresses=none $(SENSOR_PUBLISHER_FULL) $(SENSOR_PUBLISHER_PARS) $(LOCAL_ENVIRON_PARS)
+
+clean:
+	rm -f *.prof
+	ant clean
+	rm -rf tmp
+	rm -f ddspublisher-demo_*

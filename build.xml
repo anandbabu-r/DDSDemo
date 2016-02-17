@@ -14,7 +14,7 @@
     
   <!-- global properties -->
   <property name="src"         location="src/main/java"/>
-  <property name="idl"         location="src/main/idl/HelloWorldData.idl"/>
+  <property name="idl"         location="src/main/idl/SensorData.idl"/>
   <property name="target"      location="target"/>
   <property name="classes"     location="${target}/classes"/>
   <property name="gen-src"     location="${target}/generated-sources"/>

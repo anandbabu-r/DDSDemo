@@ -10,6 +10,7 @@
  */
 package helloworld;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +26,7 @@ import org.omg.dds.sub.Sample;
 import org.omg.dds.sub.Subscriber;
 import org.omg.dds.topic.Topic;
 
-import HelloWorldData.Msg;
-
+import SensorData.Msg;
 
 public class HelloWorldSubscriber
 {
@@ -36,7 +36,6 @@ public class HelloWorldSubscriber
       // Set "serviceClassName" property to Vortex Cafe implementation
       System.setProperty(ServiceEnvironment.IMPLEMENTATION_CLASS_NAME_PROPERTY,
             "com.prismtech.cafe.core.ServiceEnvironmentImpl");
-
       // Instantiate a DDS ServiceEnvironment
       ServiceEnvironment env = ServiceEnvironment.createInstance(
             HelloWorldSubscriber.class.getClassLoader());
@@ -47,8 +46,8 @@ public class HelloWorldSubscriber
       // Create a DomainParticipant with domainID=0
       DomainParticipant p = dpf.createParticipant(0);
 
-      // Create a Topic named "HelloWorldData_Msg" and with "HelloWorldData.Msg" as a type.
-      Topic<Msg> topic = p.createTopic("HelloWorldData_Msg", Msg.class);
+      // Create a Topic named "SensorData_Msg" and with "HelloWorldData.Msg" as a type.
+      Topic<Msg> topic = p.createTopic("SensorData_Msg", Msg.class);
 
       // Create a Partition QoS with "HelloWorld example" as partition.
       Partition partition = PolicyFactory.getPolicyFactory(env)
@@ -67,8 +66,12 @@ public class HelloWorldSubscriber
 
       // Prepare a List of Sample<Msg> for received samples
       List<Sample<Msg>> samples = new ArrayList<Sample<Msg>>();
+      
+      
+      while(true)
+      {
 
-      // Try to take samples every seconds. We stop as soon as we get some.
+      // Try to take samples every seconds. 
       while (samples.size() == 0)
       {
          reader.take(samples);
@@ -80,15 +83,22 @@ public class HelloWorldSubscriber
          {
             // nothing
          }
-      }
+      
+    }
+      if(samples.size() != 0)
+      {
+      DecimalFormat df = new DecimalFormat("#.00");
       System.out.println(" ________________________________________________________________");
       System.out.println("|");
-      System.out.println("| Received message : " + samples.get(0).getData().message);
+      System.out.println("| Received message !! From Publisher:" + samples.get(0).getData().userID +  " at: " + samples.get(0).getData().time + " Temperature (degree Celcius): " + df.format(samples.get(0).getData().temperature) + " Power (Watts): " + df.format(samples.get(0).getData().power)  + " Vibrations (Hertz): " + df.format(samples.get(0).getData().vibrations) );
       System.out.println("|________________________________________________________________");
       System.out.println("");
+      samples.removeAll(samples);
+      
+      }
+    }
+    
 
-      // Close Participant (closing also chlidren entities: Topic, Subscriber, DataReader)
-      p.close();
 
    }
 

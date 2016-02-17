@@ -10,6 +10,9 @@
  */
 package helloworld;
 
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import org.omg.dds.core.ServiceEnvironment;
@@ -22,13 +25,10 @@ import org.omg.dds.domain.DomainParticipantFactory;
 import org.omg.dds.pub.DataWriter;
 import org.omg.dds.pub.Publisher;
 import org.omg.dds.topic.Topic;
-
-import HelloWorldData.Msg;
-
+import SensorData.Msg;
 
 public class HelloWorldPublisher
 {
-
    public static void main(String[] args)
    {
       // Set "serviceClassName" property to Vortex Cafe implementation
@@ -45,8 +45,8 @@ public class HelloWorldPublisher
       // Create a DomainParticipant with domainID=0
       DomainParticipant p = dpf.createParticipant(0);
 
-      // Create a Topic named "HelloWorldData_Msg" and with "HelloWorldData.Msg" as a type.
-      Topic<Msg> topic = p.createTopic("HelloWorldData_Msg", Msg.class);
+      // Create a Topic named "SensorData_Msg" and with "HelloWorldData.Msg" as a type.
+      Topic<Msg> topic = p.createTopic("SensorData_Msg", Msg.class);
 
       // Create a Partition QoS with "HelloWorld example" as partition.
       Partition partition = PolicyFactory.getPolicyFactory(env)
@@ -62,39 +62,57 @@ public class HelloWorldPublisher
       // Create DataReader on our topic with default QoS except Reliability and Durability
       DataWriter<Msg> writer = pub.createDataWriter(topic,
             pub.getDefaultDataWriterQos().withPolicies(r, d));
-
+      
+      
+  	String userId = args[0];
       // The message we want to publish
-      Msg msg = new Msg(1, "Hello World");
+      double temperature;
+      double power;
+      double vibrations;
+      String time;
+		while (true) {
+			 temperature = (Math.random() * (99 - (-99)) + (-99));
+			 power = (Math.random() * (1000 - (1)) + (1));
+			 vibrations = (Math.random() * (1000 - (1)) + (1));
+			 DecimalFormat df = new DecimalFormat("#.00");
+			 
+			 Date date = new Date();
+			 time  = date.toString();
+			Msg msg = new Msg(userId, temperature,power, vibrations, time);
+			try {
+				System.out
+						.println(" ________________________________________________________________");
+				System.out.println("|");
+				System.out.println("| Sending message!! Publisher: " + userId + " at: "
+						+ time
+						+ " Temperature (degree Celcius) "
+						+ df.format(temperature)
+						+ " Power (Watts) "  
+						+ df.format(power)
+						+ " Vibrations (Hertz) "
+						+ df.format(vibrations));
+				System.out
+						.println("|________________________________________________________________");
+				System.out.println("");
 
-      try
-      {
-         System.out.println(" ________________________________________________________________");
-         System.out.println("|");
-         System.out.println("| Publish message : " + msg.message);
-         System.out.println("|________________________________________________________________");
-         System.out.println("");
+				// Publish the message
+				writer.write(msg);
+			} catch (TimeoutException e) {
+				// TimeoutException may happen using Reliable QoS (if
+				// publication buffers are full)
+				e.printStackTrace();
+			}
 
-         // Publish the message
-         writer.write(msg);
-      }
-      catch (TimeoutException e)
-      {
-         // TimeoutException may happen using Reliable QoS (if publication buffers are full)
-         e.printStackTrace();
-      }
-
-      try
-      {
-         // Wait to ensure data is received before we delete writer
-         Thread.sleep(1000);
-      }
-      catch (InterruptedException e1)
-      {
-         e1.printStackTrace();
-      }
-
+			try {
+				// Wait to ensure data is received before we delete writer
+				Thread.sleep(100000);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+		}
       // Close Participant (closing also chlidren entities: Topic, Publisher, DataWriter)
-      p.close();
+      //p.close();
 
    }
 }
+

@@ -1,0 +1,37 @@
+JAMAICA=/local/babu/branch-8/petalinux_ful
+VORTEX_HOME=/local/babu/customers/Embeddedworld/vortext_tryagain/Vortex_v2/Device/VortexCafe/2.2.0/
+VORTEXCAFE_CORE=$(VORTEX_HOME)/lib/cafe.jar
+SLF4J_LOGGING=/local/babu/customers/Embeddedworld/vortext_tryagain/slf4j/slf4j-1.7.14/slf4j-simple-1.7.14.jar
+
+CLASSPATH=target/classes:$(VORTEXCAFE_CORE):$(SLF4J_LOGGING)
+SENSOR_SUBSCRIBER_MAIN=HelloWorldSubscriber
+TARGET=linux-x86_64
+SENSOR_SUBSCRIBER_FULL=helloworld.$(SENSOR_SUBSCRIBER_MAIN)
+SENSOR_SUBSCRIBER_PARS=-cp $(CLASSPATH) $(SENSOR_SUBSCRIBER_MAIN)
+PORT=7410
+PRISMTECH_LICENSE_LOCATION=/local/babu/customers/Embeddedworld/vortext_tryagain/LK04713.lic
+
+
+all: run
+
+run: $(SENSOR_SUBSCRIBER_MAIN)
+	-timeout -s SIGINT 20  ./ddssubscriber-demo_$(TARGET)
+
+$(SENSOR_SUBSCRIBER_MAIN): $(SENSOR_SUBSCRIBER_MAIN).prof
+	$(JAMAICA)/bin/jamaicabuilder -includeJAR=$(CLASSPATH) -percentageCompiled=0 -cp=$(CLASSPATH) -XdefineProperty="ddsi.network.transport=tcp" -XdefineProperty="ddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400" -XdefineProperty="ddsi.discovery.externalNetworkAddresses=none"  -XdefineProperty="ddsi.discovery.tcp.port=$(PORT)" -target=$(TARGET) -destination=ddssubscriber-demo_$(TARGET) -useProfile=$(SENSOR_SUBSCRIBER_MAIN).prof $(SENSOR_SUBSCRIBER_FULL)
+
+sensor_vm: package
+	$(JAMAICA)/bin/jamaicavm -Dddsi.network.transport=tcp -Dddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400 -Dddsi.discovery.externalNetworkAddresses=none $(SENSOR_SUBSCRIBER_PARS) $(SENSOR_SUBSCRIBER_FULL)
+
+ant: 
+	ant
+#if ant fails, please do export prismtech_LICENSE=$(PRISMTECH_LICENSE_LOCATION)
+
+$(SENSOR_SUBSCRIBER_MAIN).prof: ant
+	-timeout -s SIGINT 20 $(JAMAICA)/bin/jamaicavmp -cp=$(CLASSPATH) -Dddsi.network.transport=tcp -Dddsi.discovery.tcp.port=7410 -Dddsi.discovery.tcp.peers=demo-eu.prismtech.com:7400 -Dddsi.discovery.externalNetworkAddresses=none $(SENSOR_SUBSCRIBER_FULL) $(SENSOR_SUBSCRIBER_PARS) $(LOCAL_ENVIRON_PARS)
+
+clean:
+	rm -f *.prof
+	ant clean
+	rm -rf tmp
+	rm -f ddspublisher-demo_*
