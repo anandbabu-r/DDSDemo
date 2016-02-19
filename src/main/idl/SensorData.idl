@@ -16,6 +16,7 @@ module SensorData
       double temperature; // (in degrees C)
       double power;    // (in Watts)
       double vibrations;    // (in Hertz)
+      double amplitudeRatio;    // (in dB)
       string time; // current time
    };
    #pragma keylist Msg userID

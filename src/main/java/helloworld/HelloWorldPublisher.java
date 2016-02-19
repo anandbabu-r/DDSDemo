@@ -69,16 +69,18 @@ public class HelloWorldPublisher
       double temperature;
       double power;
       double vibrations;
+      double amplitudeRatio;
       String time;
 		while (true) {
 			 temperature = (Math.random() * (99 - (-99)) + (-99));
 			 power = (Math.random() * (1000 - (1)) + (1));
 			 vibrations = (Math.random() * (1000 - (1)) + (1));
+			 amplitudeRatio = (Math.random() * (1000 - (1)) + (1));
 			 DecimalFormat df = new DecimalFormat("#.00");
 			 
 			 Date date = new Date();
 			 time  = date.toString();
-			Msg msg = new Msg(userId, temperature,power, vibrations, time);
+			Msg msg = new Msg(userId, temperature,power, vibrations, amplitudeRatio, time);
 			try {
 				System.out
 						.println(" ________________________________________________________________");
@@ -90,7 +92,9 @@ public class HelloWorldPublisher
 						+ " Power (Watts) "  
 						+ df.format(power)
 						+ " Vibrations (Hertz) "
-						+ df.format(vibrations));
+						+ df.format(vibrations)
+						+ " Amplitude Ratio (dB) "
+						+ df.format(amplitudeRatio));
 				System.out
 						.println("|________________________________________________________________");
 				System.out.println("");
@@ -105,7 +109,7 @@ public class HelloWorldPublisher
 
 			try {
 				// Wait to ensure data is received before we delete writer
-				Thread.sleep(100000);
+				Thread.sleep(10000);
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}

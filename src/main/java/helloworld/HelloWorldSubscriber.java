@@ -85,12 +85,13 @@ public class HelloWorldSubscriber
          }
       
     }
-      if(samples.size() != 0)
+      if(samples != null && samples.size() != 0 )
       {
       DecimalFormat df = new DecimalFormat("#.00");
       System.out.println(" ________________________________________________________________");
       System.out.println("|");
-      System.out.println("| Received message !! From Publisher:" + samples.get(0).getData().userID +  " at: " + samples.get(0).getData().time + " Temperature (degree Celcius): " + df.format(samples.get(0).getData().temperature) + " Power (Watts): " + df.format(samples.get(0).getData().power)  + " Vibrations (Hertz): " + df.format(samples.get(0).getData().vibrations) );
+      if(samples.get(0) != null && samples.get(0).getData() != null)
+      System.out.println("| Received message !! From Publisher:" + samples.get(0).getData().userID +  " at: " + samples.get(0).getData().time + " Temperature (degree Celcius): " + df.format(samples.get(0).getData().temperature) + " Power (Watts): " + df.format(samples.get(0).getData().power)  + " Vibrations (Hertz): " + df.format(samples.get(0).getData().vibrations) + " Amplitude Ratio (dB): " + df.format(samples.get(0).getData().amplitudeRatio) );
       System.out.println("|________________________________________________________________");
       System.out.println("");
       samples.removeAll(samples);
